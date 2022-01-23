@@ -1,5 +1,3 @@
-import barcode
-from barcode.writer import ImageWriter
 from bs4 import BeautifulSoup as bs4
 from openpyxl import Workbook, load_workbook
 import requests
