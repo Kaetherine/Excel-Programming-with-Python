@@ -53,9 +53,17 @@ for value in range(0, 50):
     city = fake.city()
     postcode = fake.postcode()
 
-    customers.range(f'A{i}').value = [vat_id, company, street, street_no, postcode, city]
-    delivery.range(f'A{i}').value = [delivery_no, date, 'get_company()', amount, amount_payed, amount_open, status]
-    products.range(f'A{i}').value = [product_no, product_name, net, vat_rate, discount, reduced, sumnet]
+    customers.range(f'A{i}').value = [
+            vat_id, company, street, street_no, postcode, city
+            ]
+    delivery.range(f'A{i}').value = [
+            delivery_no, date, 'get_company()', amount, amount_payed,
+            amount_open, status
+            ]
+    products.range(f'A{i}').value = [
+            product_no, product_name, net, vat_rate, discount,
+            reduced, sumnet
+            ]
     i += 1
 
 
