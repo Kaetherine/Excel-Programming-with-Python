@@ -13,9 +13,17 @@ customers.name = 'customers'
 delivery = wb.sheets.add('delivery note', after='customers')
 products = wb.sheets.add('products', after='delivery note')
 
-customers_values = ['vat_id', 'company', 'street', 'street_no', 'zip', 'city']
-delivery_values = ['delivery_no', 'date', 'company', 'amount', 'amount payed', 'amount open', 'status']
-products_values = ['product_no', 'product_name', 'net', 'vat rate', 'discount', 'reduced', 'sum net']
+customers_values = [
+        'vat_id', 'company', 'street', 'street_no', 'zip', 'city'
+        ]
+delivery_values = [
+        'delivery_no', 'date', 'company', 'amount', 'amount payed',
+        'amount open', 'status'
+        ]
+products_values = [
+        'product_no', 'product_name', 'net', 'vat rate',
+        'discount', 'reduced', 'sum net'
+        ]
 
 customers.range('A1').value = customers_values
 delivery.range('A1').value = delivery_values
