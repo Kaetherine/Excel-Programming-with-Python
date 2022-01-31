@@ -2,8 +2,60 @@ from faker import Faker
 import xlwings as xw
 import random
 
+'''example use case: tracking of deliverys/ services to
+support creation of revenue surplus statement'''
+
 def main():
-    pass
+	'''opens front-end app and prompts for input'''
+	pass
+
+@xw.func
+def print_delivery_note():
+	'''creates and saves delivery note to directory of choice'''
+	pass
+
+@xw.func
+def print_bill():
+	'''
+	-creates and saves bill to directory of choice,
+	-contains delivery note number,
+	-registers billing information in excel overview
+	'''
+	pass
+
+@xw.func
+def print_billing_register():
+	'''saves overview of billing register to read'''
+	pass
+
+@xw.func
+def add_artikle():
+	'''adds artikle to assortment'''
+	pass
+
+@xw.func
+def add_customer():
+	'''adds customer to sheet "customers"'''
+	pass
+
+@xw.func
+def payment_update():
+	'''adds single payments and updates the payment status'''
+	pass
+
+@xw.func
+def find(data):
+	'''finds customers, bills and delivery notes in spreadsheets'''
+	if data == 'customers':
+		pass
+	elif data == 'products':
+		pass
+	elif data == 'delivery note':
+		pass
+
+def validate(word):
+	'''evaluates input word'''
+	pass
 
 def setup():
 
