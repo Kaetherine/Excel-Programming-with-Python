@@ -67,7 +67,7 @@ class Operations():
 		by erasing previous inputs'''
 		row = self.check_len_sheet(self.products)
 		for value in range(1, row):
-			amount = self.wb.sheets[0].range(f'D{row}')
+			amount = self.products.range(f'D{row}')
 			if amount != None:
 				amount.clear()
 				row -= 1
@@ -75,10 +75,8 @@ class Operations():
 			else:
 				row -= 1
 				continue
-		self.bill.delete()
-		self.wb.save()
 	
-	def break_line(self, cell):
+	def make_breakline(self, cell):
 		''''Writes a breakline into the given cell'''
 		self.bill.range(f'{cell}').value = (
 			'_____________________________________________________________'
@@ -135,7 +133,7 @@ class Operations():
 		sender = f'{seller_data["company"]}, {s_full_street}, {s_full_city}'
 
 		self.bill.range('A1').value = sender
-		self.break_line('A2')
+		self.make_breakline('A2')
 
 		full_street = f'{customer_data["street"]}, {customer_data["str_no"]}'
 		full_city = f'{customer_data["zip"]} {customer_data["city"]}'
@@ -149,7 +147,7 @@ class Operations():
 			'Position', 'Artikelnr', 'Artikelbez.', 'Einzelpreis',
 			'Menge', None, 'Gesamt'
 			]
-		self.break_line('A14')
+		self.make_breakline('A14')
 		
 		net_sum = 0
 		pos = 1
@@ -184,7 +182,7 @@ class Operations():
 		self.bill.range('A35').value = 'Satz zum Zahlungstermin.'
 		self.bill.range('A37').value = 'Satz zur Aufbewahrungspflicht.'
 
-		self.break_line('A39')
+		self.make_breakline('A39')
 		self.bill.range('A40').value = [
 			[f'USt.Id.: {seller_data["vat_id"]}'],
 			[seller_data['company']],
@@ -209,6 +207,8 @@ class Operations():
 
 		self.bill.to_pdf()
 		self.reset()
+		self.bill.delete()
+		self.wb.save()
 
 	def billoverview_to_pdf(self):
 		'''saves overview of billing overview to read'''
@@ -231,7 +231,7 @@ class Operations():
 
 	def setup_sampledata(self):
 		'''imports sample data to test the application'''
-
+		self.delete_data()
 		fake = Faker(['de_DE'])
 		i = 2
 		for n in range(0, 50):
