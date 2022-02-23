@@ -10,30 +10,34 @@ class Operations():
 		self.wb = self.app.books.open(
 			'main.xlsm', read_only=False, ignore_read_only_recommended=True
 			)
-		self.date = datetime.today().strftime('%Y-%m-%d')
-		if self.wb.sheets[1] and self.wb.sheets[2]:
-			self.products = self.wb.sheets[0]
-			self.customers = self.wb.sheets[1]
-			self.bill_overview = self.wb.sheets[2]
-			self.products.name = 'Produktkatalog'
-			self.customers.name = 'Kundendaten'
-			self.bill_overview.name = 'Rechnungsübersicht'
+		if len(self.wb.sheets) > 3:
+			self.wb.sheets[3].delete()
+			self.initialize_sheets()
+		elif self.wb.sheets[1] and self.wb.sheets[2]:
+			self.initialize_sheets()
 		else:
-			self.products = self.wb.sheets[0]
-			self.products.name = 'Produktkatalog'
-			self.customers = self.wb.sheets.add(
-				'Kundendaten', after='Produktkatalog')
-			self.bill_overview = self.wb.sheets.add(
-				'Rechnungsübersicht', after='Kundendaten')
-	
-	def name_columns(self):
-		'''names all columns to supervise structure for basis data'''
+			self.make_sheets()
+
+	def make_sheets(self):
+		'''adds sheets to define book structure'''
 		self.products = self.wb.sheets[0]
 		self.products.name = 'Produktkatalog'
 		self.customers = self.wb.sheets.add(
-			'Kundendaten', after='Produktkatalog')
+		'Kundendaten', after='Produktkatalog')
 		self.bill_overview = self.wb.sheets.add(
-			'Rechnungsübersicht', after='Kundendaten')
+		'Rechnungsübersicht', after='Kundendaten')
+
+	def initialize_sheets(self):
+		'''initializes and organizes and names the sheets'''
+		self.products = self.wb.sheets[0]
+		self.customers = self.wb.sheets[1]
+		self.bill_overview = self.wb.sheets[2]
+		self.products.name = 'Produktkatalog'
+		self.customers.name = 'Kundendaten'
+		self.bill_overview.name = 'Rechnungsübersicht'
+	
+	def name_columns(self):
+		'''names all columns to define structure for basis data'''
 		customers_values = [
 				'USt.Id', 'Unternehmensname', 'Straße', 'Hausnr.', 'PLZ',
 				'Ort'
@@ -98,10 +102,7 @@ class Operations():
 			'iban': 'DE50200001000100008000', 'bic': 'LLO30RLD1CA'
 		}
 		
-		adress_location = self.app.selection.options(numbers=int)
-		customer_adress = adress_location.value
 		shopping_cart = []
-
 		len_products = self.check_len_sheet(self.products)
 		i = 2
 		for value in range(0,len_products-1):
@@ -113,18 +114,20 @@ class Operations():
 			else:
 				i+=1
 				continue
-
-		customer_data = {}
-		customer_data.update({
-			'vat_id': customer_adress[0], 'company': customer_adress[1],
-			'street': customer_adress[2], 'str_no': customer_adress[3],
-			'zip':customer_adress[4], 'city': customer_adress[5]
-			})
+		
+		adress_location = self.app.selection.options(numbers=int)
+		customer_data = adress_location.value
+		customer_data = {
+			'vat_id': customer_data[0], 'company': customer_data[1],
+			'street': customer_data[2], 'str_no': customer_data[3],
+			'zip':customer_data[4], 'city': customer_data[5]
+			}
 
 		after_last_bill = self.check_len_sheet(self.bill_overview)
-		customer_hint = customer_data['vat_id'][0:3]
+		customer_hint = customer_data['vat_id'][2:4]
 		year = datetime.today().strftime('%Y')
 		bill_no = f'{after_last_bill-1}-{year}{customer_hint}'
+		
 		self.bill = self.wb.sheets.add(bill_no, after='Rechnungsübersicht')
 		self.bill.range('A11').value = [f'Rechnungsnummer {bill_no}']
 
@@ -135,12 +138,13 @@ class Operations():
 		self.bill.range('A1').value = sender
 		self.make_breakline('A2')
 
-		full_street = f'{customer_data["street"]}, {customer_data["str_no"]}'
-		full_city = f'{customer_data["zip"]} {customer_data["city"]}'
+		c_full_street = f'{customer_data["street"]}, {customer_data["str_no"]}'
+		c_full_city = f'{customer_data["zip"]} {customer_data["city"]}'
 		self.bill.range('A5').value = customer_data["company"]
-		self.bill.range('A6').value = full_street
-		self.bill.range('A7').value = full_city
+		self.bill.range('A6').value = c_full_street
+		self.bill.range('A7').value = c_full_city
 
+		self.date = datetime.today().strftime('%Y-%m-%d')
 		self.bill.range('G9').value = self.date
 		
 		self.bill.range('A13').value = [
@@ -226,6 +230,7 @@ class Operations():
 		else:
 			self.wb.sheets[0].clear()
 		self.wb.sheets[0].name = 'Tabelle1'
+		self.make_sheets()
 		self.name_columns()
 		self.wb.save()
 

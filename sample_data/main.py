@@ -15,10 +15,10 @@ def main():
 		command=operation.bill_to_pdf).grid(
 			column=1, row=2, ipady=8, ipadx=32
 			)
-	btn_exp_bill_register = ttk.Button(
+	btn_exp_bill_overview = ttk.Button(
 		frame, text="PDF Rechnungsübersicht",
 		command = operation.billoverview_to_pdf).grid(
-			column=1, row=3, ipady=8, ipadx=10
+			column=1, row=3, ipady=8, ipadx=6
 			)
 	btn_delete_data = ttk.Button(
 		frame, text="Daten löschen",
