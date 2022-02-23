@@ -1,6 +1,5 @@
 from faker import Faker
 import xlwings as xw
-import random
 from datetime import datetime
 
 class Operations():
@@ -14,10 +13,10 @@ class Operations():
 		self.date = datetime.today().strftime('%Y-%m-%d')
 		if self.wb.sheets[1] and self.wb.sheets[2]:
 			self.products = self.wb.sheets[0]
-			self.customer = self.wb.sheets[1]
+			self.customers = self.wb.sheets[1]
 			self.bill_overview = self.wb.sheets[2]
 			self.products.name = 'Produktkatalog'
-			self.customer.name = 'Kundendaten'
+			self.customers.name = 'Kundendaten'
 			self.bill_overview.name = 'Rechnungsübersicht'
 		else:
 			self.products = self.wb.sheets[0]
@@ -78,6 +77,13 @@ class Operations():
 				continue
 		self.bill.delete()
 		self.wb.save()
+	
+	def break_line(self, cell):
+		''''Writes a breakline into the given cell'''
+		self.bill.range(f'{cell}').value = (
+			'_____________________________________________________________'
+			'_______________'
+		)
 
 	def quit(self):
 		'''saves applied changes and quits excel'''
@@ -88,13 +94,13 @@ class Operations():
 		'''exports and registers billing information in excel overview'''
 		seller_data = {
 			'vat_id': 'DE12345678', 'company': 'Merve Musterfrau GbR',
-			'street': 'Musterstraße', 'str_no': 15.0, 'zip': 54321.0,
+			'street': 'Musterstraße', 'str_no': '15', 'zip': '54321',
 			'city': 'Berlin', 'phone': '0049 30 2022 123',
 			'email': 'buchhaltung@mervem.com', 'bank': 'Berliner Musterbank',
 			'iban': 'DE50200001000100008000', 'bic': 'LLO30RLD1CA'
 		}
 		
-		adress_location = self.app.selection
+		adress_location = self.app.selection.options(numbers=int)
 		customer_adress = adress_location.value
 		shopping_cart = []
 
@@ -129,12 +135,7 @@ class Operations():
 		sender = f'{seller_data["company"]}, {s_full_street}, {s_full_city}'
 
 		self.bill.range('A1').value = sender
-		self.bill.range('A2').value = (
-			'_____________________________________________________________'
-			'_______________'
-		)
-
-		#picture/logo
+		self.break_line('A2')
 
 		full_street = f'{customer_data["street"]}, {customer_data["str_no"]}'
 		full_city = f'{customer_data["zip"]} {customer_data["city"]}'
@@ -145,23 +146,21 @@ class Operations():
 		self.bill.range('G9').value = self.date
 		
 		self.bill.range('A13').value = [
-			'Position', 'Artikelnr', 'Artikelbez.', 'Menge',
-			'Einzelpreis', None, 'Gesamt'
+			'Position', 'Artikelnr', 'Artikelbez.', 'Einzelpreis',
+			'Menge', None, 'Gesamt'
 			]
-		self.bill.range(f'A14').value = (
-			'_____________________________________________________________'
-			'_______________'
-		)
+		self.break_line('A14')
+		
 		net_sum = 0
 		pos = 1
 		n = 15
 		for art in shopping_cart:
 			amount = art[-1]
-			single_price = art[-2]
+			single_price = float(art[-2])
 			total = amount*single_price
 			art.insert(0, str(pos))
 			art.append(None)
-			art.append(total)
+			art.append(f'{total:.2f}')
 			net_sum += total
 			self.bill.range(f'A{n}').value = art
 			n += 1
@@ -172,18 +171,22 @@ class Operations():
 		self.bill.range(f'E{n+1}').value = (
 			'________________________________'
 		)
-		self.bill.range(f'E{n+2}').value = ['Summe Netto', None, net_sum]
-		self.bill.range(f'E{n+3}').value = ['19% Umsatzsteuer', None, tax_amount]
-		self.bill.range(f'E{n+4}').value = ['Rechnungsbetrag', None, gross_sum]
+		self.bill.range(f'E{n+2}').value = [
+			'Summe Netto', None, f'{net_sum:.2f}'
+			]
+		self.bill.range(f'E{n+3}').value = [
+			'19% Umsatzsteuer', None, f'{tax_amount:.2f}'
+			]
+		self.bill.range(f'E{n+4}').value = [
+			'Rechnungsbetrag', None, f'{gross_sum:.2f}'
+			]
 
 		self.bill.range('A35').value = 'Satz zum Zahlungstermin.'
 		self.bill.range('A37').value = 'Satz zur Aufbewahrungspflicht.'
 
-		self.bill.range('A40').value = (
-			'_____________________________________________________________'
-			'_______________'
-		)
-		self.bill.range('A41').value = [
+		self.break_line('A39')
+		self.bill.range('A40').value = [
+			[f'USt.Id.: {seller_data["vat_id"]}'],
 			[seller_data['company']],
 			[s_full_street],
 			[s_full_city],
@@ -195,20 +198,20 @@ class Operations():
 			[f'Bank: {seller_data["bank"]}'],
 			[f'IBAN: {seller_data["iban"]}'],
 			[f'BIC: {seller_data["bic"]}'],
-			[f'Kontoinhaber: {seller_data["company"]}'],
+			[f'Kontoinhaberin: {seller_data["company"]}'],
 			[f'Verwendungszweck: {bill_no}']
 			]
 		
 		self.bill_overview.range(f'A{after_last_bill}').value = [
-			bill_no, self.date, customer_data['vat_id'], net_sum,
-			tax_amount, gross_sum
+			bill_no, self.date, customer_data['vat_id'], f'{net_sum:.2f}',
+			f'{tax_amount:.2f}', f'{gross_sum:.2f}'
 		]
 
 		self.bill.to_pdf()
 		self.reset()
 
-	def billregister_to_pdf(self):
-		'''saves overview of billing register to read'''
+	def billoverview_to_pdf(self):
+		'''saves overview of billing overview to read'''
 		self.bill_overview.to_pdf()
 
 	def delete_data(self):
@@ -229,14 +232,14 @@ class Operations():
 	def setup_sampledata(self):
 		'''imports sample data to test the application'''
 
-		fake = Faker(['de'])
+		fake = Faker(['de_DE'])
 		i = 2
 		for n in range(0, 50):
 			street = fake.street_name()
 			company = fake.company()
-			net = fake.pyfloat(3, 2, min_value=100, max_value=910)
-			vat_id  = f'DE{random.randint(391246789, 406546709)}'
-			street_no = random.randint(1, 160)
+			net = fake.pyfloat(3, 2, min_value=100, max_value=900)
+			vat_id  = fake.vat_id()
+			street_no = fake.pyint(min_value=1, max_value=160)
 			product_name = fake.first_name().upper()
 			city = fake.city()
 			postcode = fake.postcode()
@@ -251,3 +254,7 @@ class Operations():
 					]
 			i += 1
 		self.wb.save()
+
+
+
+

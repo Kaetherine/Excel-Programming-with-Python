@@ -1,24 +1,23 @@
 from tkinter import *
 from tkinter import ttk
-import operations
-
+import tkinter
+from operations import Operations
 
 def main():
 	'''opens gui app and prompts for input'''
-	operation = operations.Operations()
+	operation = Operations()      
 	root = Tk()
 	frame = ttk.Frame(root, padding=32)
 	frame.grid(columnspan=3, rowspan=100)
-	# prompt = ttk.Label(frame, text="Pick a task.").grid(column=0, row=0)
-
+	
 	btn_exp_bill = ttk.Button(
 		frame, text="PDF Rechnung",
 		command=operation.bill_to_pdf).grid(
 			column=1, row=2, ipady=8, ipadx=32
 			)
 	btn_exp_bill_register = ttk.Button(
-		frame, text="PDF Rechnungsregister",
-		command = operation.billregister_to_pdf).grid(
+		frame, text="PDF Rechnungsübersicht",
+		command = operation.billoverview_to_pdf).grid(
 			column=1, row=3, ipady=8, ipadx=10
 			)
 	btn_delete_data = ttk.Button(
