@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import ttk
-import tkinter
+
 from operations import Operations
 
 def main():

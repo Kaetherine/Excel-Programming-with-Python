@@ -1,6 +1,6 @@
 from faker import Faker
+from datetime import datetime, timedelta
 import xlwings as xw
-from datetime import datetime
 
 class Operations():
 
@@ -69,15 +69,11 @@ class Operations():
 	def reset(self):
 		'''prepares application setup to create more bills
 		by erasing previous inputs'''
-		row = self.check_len_sheet(self.products)
-		for value in range(1, row):
+		end_products = self.check_len_sheet(self.products)
+		for row in range(2, end_products):
 			amount = self.products.range(f'D{row}')
 			if amount != None:
 				amount.clear()
-				row -= 1
-				continue
-			else:
-				row -= 1
 				continue
 	
 	def make_breakline(self, cell):
@@ -104,15 +100,15 @@ class Operations():
 		
 		shopping_cart = []
 		len_products = self.check_len_sheet(self.products)
-		i = 2
-		for value in range(0,len_products-1):
-			if self.products.range(f'D{i}').value != None:
-				item = self.products.range(f'A{i}:D{i}').value
+		row = 2
+		for count in range(0,len_products-1):
+			if self.products.range(f'D{row}').value != None:
+				item = self.products.range(f'A{row}:D{row}').value
 				shopping_cart.append(item)
-				i+=1
+				row+=1
 				continue
 			else:
-				i+=1
+				row+=1
 				continue
 		
 		adress_location = self.app.selection.options(numbers=int)
@@ -129,7 +125,7 @@ class Operations():
 		bill_no = f'{after_last_bill-1}-{year}{customer_hint}'
 		
 		self.bill = self.wb.sheets.add(bill_no, after='Rechnungsübersicht')
-		self.bill.range('A11').value = [f'Rechnungsnummer {bill_no}']
+		self.bill.range('A11').value = [f'Rechnungsnummer: {bill_no}']
 
 		s_full_street = f'{seller_data["street"]}, {seller_data["str_no"]}'
 		s_full_city = f'{seller_data["zip"]} {seller_data["city"]}'
@@ -183,8 +179,14 @@ class Operations():
 			'Rechnungsbetrag', None, f'{gross_sum:.2f}'
 			]
 
-		self.bill.range('A35').value = 'Satz zum Zahlungstermin.'
-		self.bill.range('A37').value = 'Satz zur Aufbewahrungspflicht.'
+		date = datetime.now()
+		days = timedelta(days=14)
+		delivery_date = str(date + days)
+		year = delivery_date[0:4]
+		month = delivery_date[5:7]
+		day = delivery_date[8:10]
+		delivery_date = f'{day}.{month}.{year}'
+		self.bill.range('A35').value = f'Lieferzeitpunkt: {delivery_date}'
 
 		self.make_breakline('A39')
 		self.bill.range('A40').value = [
